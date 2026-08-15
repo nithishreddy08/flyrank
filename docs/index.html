@@ -1,1 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Predicting Content Decline | FlyRank Capstone</title>
 
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      line-height: 1.7;
+      background: #f5f7fb;
+      color: #20242a;
+    }
+
+    header {
+      background: #111827;
+      color: white;
+      padding: 70px 20px;
+    }
+
+    .container {
+      max-width: 950px;
+      margin: auto;
+      padding: 0 20px;
+    }
+
+    h1 {
+      font-size: 42px;
+      line-height: 1.2;
+      margin-bottom: 20px;
+    }
+
+    h2 {
+      margin-top: 50px;
+      color: #111827;
+      border-bottom: 2px solid #e5e7eb;
+      padding-bottom: 8px;
+    }
+
+    h3 {
+      margin-top: 30px;
+    }
+
+    .subtitle {
+      font-size: 19px;
+      color: #d1d5db;
+    }
+
+    .card {
+      background: white;
+      padding: 30px;
+      margin: 25px 0;
+      border-radius: 12px;
+      box-shadow: 0 3px 15px rgba(0,0,0,0.06);
+    }
+
+    .metric-container {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .metric {
+      flex: 1;
+      min-width: 220px;
+      background: #f9fafb;
+      padding: 22px;
+      border-radius: 10px;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 30px;
+      margin-bottom: 5px;
+    }
+
+    .chart {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .bar {
+      display: inline-block;
+      width: 120px;
+      margin: 0 20px;
+      vertical-align: bottom;
+    }
+
+    .bar-fill {
+      background: #374151;
+      color: white;
+      padding-top: 10px;
+      border-radius: 8px 8px 0 0;
+    }
+
+    .bar-label {
+      margin-top: 10px;
+      font-weight: bold;
+    }
+
+    footer {
+      margin-top: 60px;
+      padding: 40px 20px;
+      background: #111827;
+      color: white;
+      text-align: center;
+    }
+
+    a {
+      color: #2563eb;
+    }
+
+    li {
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="container">
+    <div class="subtitle">Google Search Ranking & Discoverability Capstone</div>
+
+    <h1>
+      Predicting Content Decline to Prioritize Search Content Review
+    </h1>
+
+    <p class="subtitle">
+      A machine-learning approach to prioritizing content items for human review.
+    </p>
+  </div>
+</header>
+
+<main class="container">
+
+  <section class="card">
+    <h2>Abstract</h2>
+
+    <p>
+      This study asks whether machine learning can identify content items
+      that are more likely to decline in performance so that human reviewers
+      can prioritize them for inspection. Using the anonymized FlyRank
+      ML Internship content-refresh dataset, a Random Forest model was
+      evaluated against a simple baseline using the same held-out validation
+      design. The baseline achieved approximately 0.24 Precision@50, while
+      the reported Random Forest result was approximately 0.68–0.74
+      Precision@50 across runs. This indicates substantially stronger
+      prioritization performance for the model on this validation setup,
+      with roughly a three-fold improvement over the baseline. The result
+      supports using machine learning as a review-prioritization signal,
+      while avoiding the claim that the model can automatically determine
+      which content should be changed or refreshed.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>1. Introduction / Problem Statement</h2>
+
+    <p>
+      Search content can change in performance over time, making it
+      difficult for human teams to decide which items deserve attention
+      first. Reviewing every content item equally is inefficient, so the
+      practical question is whether historical content and performance
+      signals can help prioritize the items most likely to decline.
+    </p>
+
+    <p>
+      This work frames the problem as binary classification and evaluates
+      whether a machine-learning model can improve the ranking of potentially
+      declining content compared with a simple baseline. The intended
+      decision is prioritization for human review rather than fully
+      automated content changes.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>2. Data</h2>
+
+    <p>
+      This analysis uses the public-safe FlyRank ML Internship dataset,
+      specifically the anonymized content refresh table
+      <code>data/raw/content_refresh_anonymized.csv</code>.
+    </p>
+
+    <p>
+      The table contains 30,000 pseudonymized content items across 32 clients.
+      It includes content attributes, search-related features, and
+      trailing-90-day performance metrics.
+    </p>
+
+    <p>
+      Client identities, private search queries, private URLs, and other
+      identifying information are not used or reported.
+    </p>
+
+    <p>
+      For leakage prevention, <code>trend_pct</code> and
+      <code>trend_direction</code> are excluded from model features because
+      the decline outcome is derived from trend information.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>3. Methodology</h2>
+
+    <h3>Problem formulation</h3>
+
+    <p>
+      The analysis treats decline prediction as a binary classification
+      problem. The goal is to prioritize content items for human review,
+      not to automate the final decision.
+    </p>
+
+    <h3>Features</h3>
+
+    <p>
+      The model uses available content, search, performance, freshness,
+      and engagement-related features. Identifying fields and fields that
+      directly define the outcome are excluded.
+    </p>
+
+    <h3>Label definition</h3>
+
+    <p>
+      The target is the dataset's <code>is_declining_label</code>,
+      representing whether a content item is classified as declining.
+    </p>
+
+    <h3>Baseline</h3>
+
+    <p>
+      The trained model is compared against a simple baseline using the
+      same validation split so that the comparison is directly interpretable.
+    </p>
+
+    <h3>Validation and leakage checks</h3>
+
+    <p>
+      The evaluation uses a held-out validation design. Target-derived fields
+      including <code>trend_pct</code> and <code>trend_direction</code> are
+      excluded. Identifying fields such as <code>content_id</code> and
+      <code>client_id</code> are not used as predictive features.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>4. Results</h2>
+
+    <div class="metric-container">
+
+      <div class="metric">
+        <strong>0.24</strong>
+        Baseline Precision@50
+      </div>
+
+      <div class="metric">
+        <strong>0.68–0.74</strong>
+        Random Forest Precision@50
+      </div>
+
+    </div>
+
+    <div class="chart">
+
+      <div class="bar">
+        <div class="bar-fill" style="height:120px;">
+          0.24
+        </div>
+        <div class="bar-label">
+          Baseline
+        </div>
+      </div>
+
+      <div class="bar">
+        <div class="bar-fill" style="height:350px;">
+          0.68–0.74
+        </div>
+        <div class="bar-label">
+          Random Forest
+        </div>
+      </div>
+
+      <p>
+        Precision@50 comparison using the same evaluation design.
+      </p>
+
+    </div>
+
+    <h3>Interpretation</h3>
+
+    <p>
+      The trained model shows substantially stronger prioritization
+      performance than the simple baseline on this validation setup.
+      The result suggests that the model can help reviewers focus attention
+      on a smaller set of content items with a higher predicted likelihood
+      of decline.
+    </p>
+
+    <p>
+      These results are evidence from this dataset and validation design,
+      not proof of production performance or causal impact.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>5. Limitations & Honest Framing</h2>
+
+    <ul>
+      <li>
+        The dataset represents a specific anonymized FlyRank release and
+        may not represent all search content or future conditions.
+      </li>
+
+      <li>
+        The model identifies statistical patterns associated with decline;
+        it does not establish that predicted items will definitely decline.
+      </li>
+
+      <li>
+        Model performance depends on the selected validation design and
+        available features.
+      </li>
+
+      <li>
+        Missing values and incomplete fields may affect prediction quality.
+      </li>
+
+      <li>
+        Client-specific conclusions cannot be made because identifying
+        information is intentionally excluded.
+      </li>
+
+      <li>
+        Recommendations are intended to support human review rather than
+        replace editorial or business judgment.
+      </li>
+
+      <li>
+        The reported results should not be interpreted as proof of
+        production performance or causal effects.
+      </li>
+    </ul>
+  </section>
+
+  <section class="card">
+    <h2>6. Ranked Recommendations</h2>
+
+    <ol>
+      <li>
+        <strong>Review the highest-ranked declining candidates first.</strong>
+        These items have the strongest predicted likelihood of decline.
+      </li>
+
+      <li>
+        <strong>Check recent performance changes.</strong>
+        Review traffic, impressions, clicks, engagement, and freshness
+        signals before deciding on an action.
+      </li>
+
+      <li>
+        <strong>Inspect content freshness.</strong>
+        Older or stale content should be reviewed for outdated information
+        or improvement opportunities.
+      </li>
+
+      <li>
+        <strong>Check search and content context.</strong>
+        Review search demand, competition, intent, and content type.
+      </li>
+
+      <li>
+        <strong>Use human review before taking action.</strong>
+        A prediction is a prioritization signal, not an automatic instruction
+        to rewrite, remove, or refresh content.
+      </li>
+
+      <li>
+        <strong>Monitor outcomes after action.</strong>
+        Future performance should be checked to determine whether the
+        recommendations remain useful.
+      </li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>7. Reproducibility</h2>
+
+    <p>
+      The analysis is organized in the project repository so that the
+      workflow can be inspected and rerun from the available notebooks
+      and supporting artifacts.
+    </p>
+
+    <ul>
+      <li>
+        Capstone notebook:
+        <code>work/notebooks/capstone.ipynb</code>
+      </li>
+
+      <li>
+        Dataset:
+        <code>data/raw/content_refresh_anonymized.csv</code>
+      </li>
+
+      <li>
+        Results and baseline comparison are documented in the capstone notebook.
+      </li>
+
+      <li>
+        The ranked recommendation playbook is documented in the notebook.
+      </li>
+    </ul>
+
+    <p>
+      The project uses public-safe, anonymized information and does not
+      expose private client names, URLs, or search queries.
+    </p>
+  </section>
+
+  <section class="card">
+    <h2>8. Acknowledgments & Data Credit</h2>
+
+    <p>
+      <strong>Built on the FlyRank ML Internship dataset.</strong>
+    </p>
+
+    <p>
+      The dataset and internship context are credited to FlyRank as the
+      source of the real search data used in this research artifact.
+    </p>
+
+    <p>
+      <a href="https://flyrank.ai" target="_blank" rel="noopener">
+        FlyRank
+      </a>
+    </p>
+  </section>
+
+</main>
+
+<footer>
+  <div class="container">
+    <p>Google Search Ranking & Discoverability Capstone</p>
+    <p>Built on the FlyRank ML Internship dataset</p>
+  </div>
+</footer>
+
+</body>
+</html>
