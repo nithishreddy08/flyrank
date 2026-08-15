@@ -1,4 +1,12 @@
-# FlyRank Refresh Opportunity Model Report
+## Abstract
+
+This case study explores how machine learning can help prioritize existing content for refresh review in a content-performance workflow. Using 30,000 rows from an anonymized FlyRank content dataset, I compared baseline rules with several machine-learning models and selected a random forest based on Precision@50. The final model produced useful prioritization signals, while the results also show why model recommendations should support human review rather than replace editorial decisions.
+
+## Introduction
+
+Content teams need a practical way to identify existing pages that may need attention, especially when performance and search-related signals change over time. This project treats that as a prioritization problem: instead of automatically deciding what content should be changed, the model helps reviewers focus on content that shows stronger signals of decline or refresh opportunity.
+
+The analysis uses an anonymized FlyRank content dataset and evaluates models using a client-holdout validation strategy. The findings connect the machine-learning results back to the content-refresh problem by showing how a ranked queue can help reviewers identify high-priority items while keeping the final decision with a human reviewer.# FlyRank Refresh Opportunity Model Report
 
 This report is generated from the bundled anonymized starter dataset (`data/raw/content_refresh_anonymized.csv`).
 The model ranks existing content for refresh review. It does not use titles, URLs, client names, domains, or keywords.
